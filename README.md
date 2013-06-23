@@ -1,0 +1,1 @@
+Some code to solve Schroedinger's equations for arbitrary potentials, including ones you draw. Currently uses Numerov's method for integration and the shooting method with bisection to find the appropriate energies.
