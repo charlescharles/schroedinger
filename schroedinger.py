@@ -29,11 +29,15 @@ class Shooting1D:
         f1 = 2 * (potential[0] - energy)
         q0 = psi0[0]
         q1 = psi[1] * (1 - (self.dx**2) * f1)
+
+        # integrate forward starting from left boundary
         for ix in range(2, self.N):
             q2 = 2.0*q1 - q0 + (self.dx**2) * f1 * psi[ix-1]
             q0, q1 = q1, q2
             f1 = 2 * (potential[ix] - energy)
             psi[ix] = q1/(1.0 - (self.dx**2)*f1)
+
+        # pseudo-normalize psi
         psi /= psi.sum()
         return psi
     
@@ -79,15 +83,17 @@ class Shooting1D:
         psi = eval_psi(E)
         d = eval_dev(psi)
         
+        # find a sign change in deviation
         while d[0] * d[1] > 0:
             E[1] += dE
             psi = [psi[1], self.numerov(potential, psi0, E[1])]
             d = [d[1], self.deviation(psi[1], psi0)]
-    
+        
         E = [E[1] - dE, E[1] - dE/2, E[1]]
         psi = eval_psi(E)
         d = eval_dev(psi)
         
+        # search by bisection until deviation <= epsilon
         while math.fabs(d[1]) > eps:
             print('deviation: ' + str(d[1]))
             print 'energies: ', E
@@ -109,6 +115,9 @@ class Shooting2D:
     """
     
     def __init__(self, dx=0.01, dy=0.01, rg=((-1, 1), (-1, 1))):
+        """
+        Create one shooting-solver for each dimension
+        """
         self.xs = Shooting1D(dx=dx, rg=rg[0])
         self.ys = Shooting1D(dx=dy, rg=rg[1])
         
